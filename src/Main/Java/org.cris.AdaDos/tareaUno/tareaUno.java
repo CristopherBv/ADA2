@@ -1,4 +1,7 @@
 package org.cris.AdaDos.tareaUno;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 /*
 1. Entrada: un archivo csv con lista de alumnos y 4 columnas
 2. El programa permitirá capturar las calificaciones de "Diseño de software"
@@ -9,4 +12,27 @@ generar un archivo CSV con 3 columnas: matricula, nombre asignatura y calificaci
 más alumnos a los que no se les haya capturado calificación. (try catch?)
 */
 public class tareaUno {
+
+    //ALUMNOS (Define caracteristicas)******************
+    private static class Alumno {
+        String matricula, primerApellido, segundoApellido, nombres;
+        Integer calificacion;
+
+        public Alumno(String matricula, String primerApellido, String segundoApellido, String nombres) {
+            this.matricula = matricula;
+            this.primerApellido = primerApellido;
+            this.segundoApellido = segundoApellido;
+            this.nombres = nombres;
+            this.calificacion = null;
+        }
+
+        public String getNombreAlumno() {
+            return nombres + " " + primerApellido + " " + segundoApellido;
+        }
+
+        public String getMatricula() {
+            return matricula;
+        }
+    }
+
 }
