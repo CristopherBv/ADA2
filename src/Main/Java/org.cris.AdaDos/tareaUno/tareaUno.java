@@ -55,13 +55,27 @@ public class tareaUno {
         if (!cargarDatos()){
             return;
         }
-
+        //***********Captura de calificaciones******
         System.out.println("CAPTURA DE CALIFICACIONES (Disenio de Sofatware)");
         for (Alumno alumno : alumnos) {
-            System.out.print("Ingresa la calificación de " + alumno.getNombreAlumno() + "("+ alumno.getMatricula()+"): ");
-            alumno.calificacion = Integer.parseInt(scanner.nextLine());
-        }
+            boolean calificacionValida = false; /*bandera.oty*/
 
+            while (!calificacionValida) {
+                System.out.print("Ingresa la calificación de " + alumno.getNombreAlumno() + " (" + alumno.getMatricula() + "): ");
+                try {
+                    int calificacionTemp = Integer.parseInt(scanner.nextLine());
+                    if (calificacionTemp >= 1 && calificacionTemp <= 100) {
+                        alumno.calificacion = calificacionTemp;
+                        calificacionValida = true;
+                    } else {
+                        System.out.println("La calificación debe ser entre 1 y 100.");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Debes ingresar un número entero");
+                }
+            }
+        }
+        //******Confirmacion de salida******
         System.out.print("\n¿Desea generar el archivo csv con las calificaciones (S/N)? ");
         if (scanner.nextLine().equalsIgnoreCase("S")) {
             generarArchivoSalida();
