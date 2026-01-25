@@ -8,8 +8,8 @@ import java.util.*;
 de todos los estudiantes de la lista (del 1 al 100 puros enteros)
 3. Capturadas todas las calificaciones el usuario tendrá una opción para
 generar un archivo CSV con 3 columnas: matricula, nombre asignatura y calificación.
-4. No se podrá generar el archivo de calificaciones, punto 3, si existe uno o
-más alumnos a los que no se les haya capturado calificación. (try catch?)
+NOTA: Como no puede generarse el archivo si no se ingresa algun dato
+directamente hice que se tengan que ingresar todos los datos en la V1
 */
 public class tareaUno {
 
