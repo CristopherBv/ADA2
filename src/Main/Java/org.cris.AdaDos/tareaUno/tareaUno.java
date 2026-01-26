@@ -91,7 +91,7 @@ public class tareaUno {
                     generarArchivoSalida(rutaSalida, false);
                     break;
                 case 2:
-                    generarArchivoSalida(rutaEntrada, true);
+                    generarArchivoSalida(rutaSalida, true);
                     break;
                 default:
                     System.out.println("Opcion no valida.");
