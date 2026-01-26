@@ -58,31 +58,51 @@ public class tareaUno {
         //***********Captura de calificaciones******
         System.out.println("CAPTURA DE CALIFICACIONES (Disenio de Sofatware)");
         for (Alumno alumno : alumnos) {
-            boolean calificacionValida = false; /*bandera.oty*/
-
+            boolean calificacionValida = false;
             while (!calificacionValida) {
                 System.out.print("Ingresa la calificación de " + alumno.getNombreAlumno() + " (" + alumno.getMatricula() + "): ");
-                try {
-                    int calificacionTemp = Integer.parseInt(scanner.nextLine());
-                    if (calificacionTemp >= 1 && calificacionTemp <= 100) {
-                        alumno.calificacion = calificacionTemp;
-                        calificacionValida = true;
-                    } else {
-                        System.out.println("La calificación debe ser entre 1 y 100.");
+
+                String entrada = scanner.nextLine();
+
+                if (entrada.isEmpty()) {
+                    alumno.calificacion = null;
+                    calificacionValida = true;
+                } else {
+                    try {
+                        int calificacionTemp = Integer.parseInt(entrada);
+                        if (calificacionTemp >= 1 && calificacionTemp <= 100) {
+                            alumno.calificacion = calificacionTemp;
+                            calificacionValida = true;
+                        } else {
+                            System.out.println("La calificación debe ser entre 1 y 100.");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Debes ingresar un número entero o presionar enter.");
                     }
-                } catch (NumberFormatException e) {
-                    System.out.println("Debes ingresar un número entero");
                 }
             }
         }
-        //******Confirmacion de salida******
-        System.out.print("\n¿Desea generar el archivo csv con las calificaciones (S/N)? ");
-        if (scanner.nextLine().equalsIgnoreCase("S")) {
-            generarArchivoSalida();
-        } else {
-            System.out.println("Proceso cancelado.");
+        //******Confirmacion de salida****** PDF CSV O NADOTA
+        System.out.print("\nIngrese 1 si quiere generar el archivo CSV o 2 si desea generar el PDF: ");
+        try {
+            int opcion = scanner.nextInt();
+            switch (opcion) {
+                case 1:
+                    generarArchivoSalida(rutaSalida, false);
+                    break;
+                case 2:
+                    generarArchivoSalida(rutaEntrada, true);
+                    break;
+                default:
+                    System.out.println("Opcion no valida.");
+            }
+        }
+        catch (InputMismatchException e) {
+            System.out.println("Debe ingresar un número entero.");
+            scanner.nextLine();
         }
     }
+
     private boolean cargarDatos() {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(rutaEntrada), StandardCharsets.UTF_8))) {
             br.readLine();
@@ -102,15 +122,35 @@ public class tareaUno {
         }
     }
 
-    private void generarArchivoSalida() {
-        try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(rutaSalida), StandardCharsets.UTF_8))) {
-            pw.println("Matricula,Nombre Asignatura,Calificacion");
-            for (Alumno a : alumnos) {
-                pw.println(a.getMatricula() + ",Disenio de Software," + a.calificacion);
+    public void generarArchivoSalida(String rutaDestino, boolean esPDF) {
+
+        if (!esPDF) {
+            for (Alumno alumno : alumnos) {
+                if (alumno.calificacion == null) {
+                    System.err.println("No se puede generar el CSV.");
+                    System.err.println("El alumno " + alumno.getNombreAlumno() + " no tiene calificación.");
+                    return;
+                }
             }
-            System.out.println("Archivo generado en: " + rutaSalida);
-        } catch (IOException e) {
-            System.err.println("Error al escribir el archivo.");
+        }else {
+            try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(rutaDestino), StandardCharsets.UTF_8))) {
+                pw.println("Matricula,Nombre Asignatura,Calificacion");
+
+                for (Alumno alumno : alumnos) {
+                    String notaTexto;
+
+                    if (alumno.calificacion == null) {
+                        notaTexto = "S/C";
+                    } else {
+                        notaTexto = String.valueOf(alumno.calificacion);
+                    }
+                    pw.println(alumno.getMatricula() + ",Disenio de Software," + notaTexto);
+                }
+                System.out.println("Archivo generado en: " + rutaDestino);
+
+            } catch (IOException e) {
+                System.err.println("Error: " + e.getMessage());
+            }
         }
     }
 }
