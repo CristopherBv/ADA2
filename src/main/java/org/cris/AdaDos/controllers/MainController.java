@@ -39,8 +39,21 @@ public class MainController {
             mostrarMensaje("¡Acceso Concedido!");
             lblMensaje.setStyle("-fx-text-fill: green;");
 
-            // AQUI IRÁ LA LÓGICA PARA CAMBIAR DE VENTANA (PRÓXIMAMENTE)
-            System.out.println("Login exitoso. Cargando menú principal...");
+            try {
+                txtUsuario.getScene().getWindow().hide();
+
+                javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/org.cris.AdaDos.Views/CapturaCalificaciones.fxml"));
+                javafx.scene.Scene scene = new javafx.scene.Scene(loader.load());
+
+                javafx.stage.Stage stage = new javafx.stage.Stage();
+                stage.setTitle("Captura de Calificaciones - AdaDos");
+                stage.setScene(scene);
+                stage.show();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                mostrarMensaje("Error al abrir la app: " + e.getMessage());
+            }
 
         } else {
             mostrarMensaje("Usuario o contraseña incorrectos.");
