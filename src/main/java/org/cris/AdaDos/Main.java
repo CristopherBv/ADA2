@@ -13,12 +13,11 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        // Cargar el FXML del Login
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(LOGIN_VIEW));
 
-        Scene scene = new Scene(fxmlLoader.load(), 400, 350); // Definimos un tamaño inicial
+        Scene Login = new Scene(fxmlLoader.load(), 400, 350); // Definimos un tamaño inicial
         stage.setTitle("Login - AdaDos");
-        stage.setScene(scene);
+        stage.setScene(Login);
         stage.show();
     }
 

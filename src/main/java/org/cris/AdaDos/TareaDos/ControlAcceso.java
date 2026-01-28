@@ -1,5 +1,10 @@
 package org.cris.AdaDos.TareaDos;
-
+/**
+ *******RIP*******
+ ControlAcceso.java
+ ****2026-2026****
+@deprecated se dejó de utilizar con la implementación de la interfaz grafica
+*/
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
