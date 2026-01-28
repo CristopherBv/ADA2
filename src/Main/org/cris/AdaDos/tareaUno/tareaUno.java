@@ -1,4 +1,6 @@
 package org.cris.AdaDos.tareaUno;
+import org.cris.AdaDos.TareaTres.GeneradorPDF;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -91,7 +93,14 @@ public class tareaUno {
                     generarArchivoSalida(rutaSalida, false);
                     break;
                 case 2:
-                    generarArchivoSalida(rutaSalida, true);
+                    String rutaTemporal = rutaSalida.replace(".csv", "_temp.csv");
+                    String rutaFinalPDF = rutaSalida.replace(".csv", ".pdf");
+                    generarArchivoSalida(rutaTemporal, true);
+
+                    GeneradorPDF generador = new GeneradorPDF();
+                    generador.convertirCsvAPdf(rutaTemporal, rutaFinalPDF);
+
+                    new File(rutaTemporal).delete();
                     break;
                 default:
                     System.out.println("Opcion no valida.");
