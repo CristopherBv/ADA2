@@ -15,6 +15,8 @@ module org.cris.AdaDos {
     opens org.cris.AdaDos to javafx.fxml;
     opens org.cris.AdaDos.controllers to javafx.fxml;
 
+    opens org.cris.AdaDos.models to javafx.base;
+
     // Exportar el paquete principal para que sea visible
     exports org.cris.AdaDos;
 }
