@@ -5,31 +5,83 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.cris.AdaDos.controllers.MainController">
+<StackPane style="-fx-background-color: transparent;"
+           xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.cris.AdaDos.controllers.MainController"
+           onMousePressed="#iniciarArrastre"
+           onMouseDragged="#arrastrarVentana">
+
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
 
-    <Label text="LOGIN">
-        <font>
-            <Font name="System Bold" size="24.0" />
-        </font>
-    </Label>
+    <VBox alignment="TOP_CENTER" maxWidth="350.0" maxHeight="460.0" spacing="0.0"
+          style="-fx-background-color: white; -fx-background-radius: 20; -fx-border-radius: 20;">
 
-    <Label text="Inicio de Sesión" textFill="#5e5e5e">
-        <font>
-            <Font size="14.0" />
-        </font>
-    </Label>
+        <effect>
+            <DropShadow radius="15.0" offsetY="5.0">
+                <color>
+                    <Color opacity="0.2" />
+                </color>
+            </DropShadow>
+        </effect>
 
-    <TextField fx:id="txtUsuario" promptText="Ingresa tu usuario" maxWidth="250.0" />
+        <HBox alignment="CENTER_RIGHT" prefHeight="30.0">
+            <padding>
+                <Insets right="15.0" top="15.0" />
+            </padding>
+            <Button text="X" onAction="#cerrarAplicacion"
+                    style="-fx-background-color: transparent; -fx-text-fill: #999; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 14px;" />
+        </HBox>
 
-    <PasswordField fx:id="txtContrasenia" promptText="Ingresa tu contraseña" maxWidth="250.0" />
+        <VBox alignment="CENTER" spacing="20.0">
+            <padding>
+                <Insets bottom="40.0" left="40.0" right="40.0" top="0.0" />
+            </padding>
 
-    <Label fx:id="lblMensaje" textFill="RED" visible="false" />
 
-    <Button fx:id="btnLogin" mnemonicParsing="false" onAction="#handleLogin" text="Ingresar" defaultButton="true" style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-cursor: hand;" maxWidth="100.0"/>
-</VBox>
+            <VBox alignment="CENTER" spacing="5.0">
+                <Label text="Bienvenido" textFill="#333333">
+                    <font>
+                        <Font name="System Bold" size="24.0" />
+                    </font>
+                </Label>
+                <Label text="Ingresa tus datos" textFill="#888888">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Label>
+            </VBox>
+
+            <VBox spacing="15.0" alignment="CENTER">
+                <TextField fx:id="txtUsuario" promptText="Usuario" prefHeight="40.0"
+                           style="-fx-background-radius: 8; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-color: #fafafa; -fx-padding: 0 15;" />
+
+                <PasswordField fx:id="txtContrasenia" promptText="Contraseña" prefHeight="40.0"
+                               style="-fx-background-radius: 8; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-color: #fafafa; -fx-padding: 0 15;" />
+            </VBox>
+
+            <Label fx:id="lblMensaje" textFill="#dc3545" visible="false" wrapText="true" textAlignment="CENTER">
+                <font>
+                    <Font size="12.0" />
+                </font>
+            </Label>
+
+            <Button fx:id="btnLogin" mnemonicParsing="false" onAction="#handleLogin" text="INICIAR SESIÓN" defaultButton="true"
+                    prefHeight="45.0" prefWidth="270.0"
+                    style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,123,255,0.3), 10, 0, 0, 4);">
+                <font>
+                    <Font size="14.0"/>
+                </font>
+            </Button>
+        </VBox>
+    </VBox>
+</StackPane>

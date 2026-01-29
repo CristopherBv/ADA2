@@ -6,7 +6,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle; // Importar
 import org.cris.AdaDos.TareaDos.Security;
 
 import java.io.BufferedReader;
@@ -22,6 +24,27 @@ public class MainController {
     @FXML private Label lblMensaje;
 
     private final String usuariosEncriptados = "/home/cristopher/Cuarto_Semestre/DisenoDeSoftware/ADA2/ArchivosCSV/tabla_usuarios_encriptados.csv";
+
+    private double xOffset = 0;
+    private double yOffset = 0;
+
+    @FXML
+    private void iniciarArrastre(MouseEvent event) {
+        xOffset = event.getSceneX();
+        yOffset = event.getSceneY();
+    }
+
+    @FXML
+    private void arrastrarVentana(MouseEvent event) {
+        Stage stage = (Stage) txtUsuario.getScene().getWindow();
+        stage.setX(event.getScreenX() - xOffset);
+        stage.setY(event.getScreenY() - yOffset);
+    }
+
+    @FXML
+    private void cerrarAplicacion() {
+        System.exit(0);
+    }
 
     @FXML
     protected void handleLogin() {
@@ -45,15 +68,11 @@ public class MainController {
                 nuevaVentana.setScene(scene);
 
                 nuevaVentana.show();
-
-                nuevaVentana.setAlwaysOnTop(true);
                 nuevaVentana.toFront();
                 nuevaVentana.requestFocus();
-                nuevaVentana.setAlwaysOnTop(false); // Importante: la soltamos para que no estorbe después
 
-                // 4. Ahora sí, matamos la ventana de Login vieja
-                Stage ventanaLogin = (Stage) txtUsuario.getScene().getWindow();
-                ventanaLogin.close(); // Usamos close() en vez de hide() para liberar memoria
+                // Cerramos login
+                ((Stage) txtUsuario.getScene().getWindow()).close();
 
             } catch (Exception e) {
                 e.printStackTrace();
