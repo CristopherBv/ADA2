@@ -2,15 +2,76 @@ package org.cris.AdaDos.TareaTres;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
+import org.cris.AdaDos.models.Alumno; // Importamos tu modelo
+
 import java.io.*;
+import java.util.List;
 
 public class GeneradorPDF {
 
+    public void generarPdfDesdeLista(List<Alumno> listaAlumnos, String rutaPDFDestino) throws Exception {
+        Document documento = new Document();
+        try {
+            PdfWriter.getInstance(documento, new FileOutputStream(rutaPDFDestino));
+            documento.open();
+
+            Font fuenteTitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, BaseColor.BLUE);
+            Paragraph titulo = new Paragraph("Reporte de Calificaciones", fuenteTitulo);
+            titulo.setAlignment(Element.ALIGN_CENTER);
+            titulo.setSpacingAfter(20);
+            documento.add(titulo);
+
+            PdfPTable tabla = new PdfPTable(3);
+            tabla.setWidthPercentage(100);
+
+            agregarCelda(tabla, "Matrícula", true);
+            agregarCelda(tabla, "Nombre Completo", true);
+            agregarCelda(tabla, "Calificación", true);
+
+            for (Alumno al : listaAlumnos) {
+                agregarCelda(tabla, al.getMatricula(), false);
+
+                // Concatenamos el nombre aquí para que se vea bien
+                String nombreCompleto = al.getNombres() + " " + al.getPrimerApellido() + " " + al.getSegundoApellido();
+                agregarCelda(tabla, nombreCompleto, false);
+
+                String nota = (al.getCalificacion() == null || al.getCalificacion().isEmpty()) ? "S/C" : al.getCalificacion();
+                agregarCelda(tabla, nota, false);
+            }
+
+            documento.add(tabla);
+            System.out.println("PDF Generado en: " + rutaPDFDestino);
+
+        } finally {
+            documento.close();
+        }
+    }
+    private void agregarCelda(PdfPTable tabla, String texto, boolean esHeader) {
+        Font fuente;
+        if (esHeader) {
+            fuente = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.WHITE);
+        } else if (texto.equals("S/C")) {
+            fuente = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.RED);
+        } else {
+            fuente = FontFactory.getFont(FontFactory.HELVETICA, 12, BaseColor.BLACK);
+        }
+
+        PdfPCell celda = new PdfPCell(new Phrase(texto, fuente));
+        celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+        celda.setPadding(5);
+
+        if (esHeader) celda.setBackgroundColor(BaseColor.GRAY);
+
+        tabla.addCell(celda);
+    }
+/**
+ * @deprecated se utiliza de manera interna para tareaUno
+ * pero realmente quedo obsoleto pues los datos se manejaran distinto
+ * por eso se implemento la clase alumno
+ */
     public void convertirCsvAPdf(String rutaCSVOrigen, String rutaPDFDestino) {
         Document documento = new Document();
-
         try {
-            /******CREA EL PDF******/
             PdfWriter.getInstance(documento, new FileOutputStream(rutaPDFDestino));
             documento.open();
 
@@ -54,24 +115,5 @@ public class GeneradorPDF {
         } finally {
             documento.close();
         }
-    }
-
-    private void agregarCelda(PdfPTable tabla, String texto, boolean esHeader) {
-        Font fuente;
-        if (esHeader) {
-            fuente = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.WHITE);
-        } else if (texto.equals("S/C")) {
-            fuente = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.RED);
-        } else {
-            fuente = FontFactory.getFont(FontFactory.HELVETICA, 12, BaseColor.BLACK);
-        }
-
-        PdfPCell celda = new PdfPCell(new Phrase(texto, fuente));
-        celda.setHorizontalAlignment(Element.ALIGN_CENTER);
-        celda.setPadding(5);
-
-        if (esHeader) celda.setBackgroundColor(BaseColor.GRAY);
-
-        tabla.addCell(celda);
     }
 }
