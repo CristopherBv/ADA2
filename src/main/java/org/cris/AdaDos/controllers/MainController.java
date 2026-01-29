@@ -1,9 +1,12 @@
 package org.cris.AdaDos.controllers;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 import org.cris.AdaDos.TareaDos.Security;
 
 import java.io.BufferedReader;
@@ -14,15 +17,10 @@ import java.nio.charset.StandardCharsets;
 
 public class MainController {
 
-    // Vinculamos los elementos del FXML usando sus fx:id
-    @FXML
-    private TextField txtUsuario;
-    @FXML
-    private PasswordField txtContrasenia;
-    @FXML
-    private Label lblMensaje;
+    @FXML private TextField txtUsuario;
+    @FXML private PasswordField txtContrasenia;
+    @FXML private Label lblMensaje;
 
-    // Ruta absoluta del CSV (Misma que usabas en ControlAcceso.java)
     private final String usuariosEncriptados = "/home/cristopher/Cuarto_Semestre/DisenoDeSoftware/ADA2/ArchivosCSV/tabla_usuarios_encriptados.csv";
 
     @FXML
@@ -40,15 +38,22 @@ public class MainController {
             lblMensaje.setStyle("-fx-text-fill: green;");
 
             try {
-                txtUsuario.getScene().getWindow().hide();
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/org.cris.AdaDos.Views/CapturaCalificaciones.fxml"));
+                Scene scene = new Scene(loader.load());
+                Stage nuevaVentana = new Stage();
+                nuevaVentana.setTitle("Captura de Calificaciones - AdaDos");
+                nuevaVentana.setScene(scene);
 
-                javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/org.cris.AdaDos.Views/CapturaCalificaciones.fxml"));
-                javafx.scene.Scene scene = new javafx.scene.Scene(loader.load());
+                nuevaVentana.show();
 
-                javafx.stage.Stage stage = new javafx.stage.Stage();
-                stage.setTitle("Captura de Calificaciones - AdaDos");
-                stage.setScene(scene);
-                stage.show();
+                nuevaVentana.setAlwaysOnTop(true);
+                nuevaVentana.toFront();
+                nuevaVentana.requestFocus();
+                nuevaVentana.setAlwaysOnTop(false); // Importante: la soltamos para que no estorbe después
+
+                // 4. Ahora sí, matamos la ventana de Login vieja
+                Stage ventanaLogin = (Stage) txtUsuario.getScene().getWindow();
+                ventanaLogin.close(); // Usamos close() en vez de hide() para liberar memoria
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -66,21 +71,19 @@ public class MainController {
         lblMensaje.setVisible(true);
     }
 
-    // Lógica extraída y adaptada de ControlAcceso.java para no usar Scanner
     private boolean validarCredenciales(String usuario, String password) {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(usuariosEncriptados), StandardCharsets.UTF_8))) {
             String linea;
-            br.readLine(); // Saltar cabecera
+            br.readLine();
 
             while ((linea = br.readLine()) != null) {
                 String[] datos = linea.split(",");
-                if (datos.length < 2) continue; // Evitar errores de índice
+                if (datos.length < 2) continue;
 
                 String usuarioCSV = datos[0];
                 String contraseniaAlmacenada = datos[1];
 
                 if (usuarioCSV.equals(usuario)) {
-                    // Usamos tu clase Security existente
                     return Security.validarContrasenia(password, contraseniaAlmacenada);
                 }
             }

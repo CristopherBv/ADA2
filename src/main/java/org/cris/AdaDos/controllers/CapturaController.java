@@ -3,17 +3,16 @@ package org.cris.AdaDos.controllers;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality; // Importante para el pop-up
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import org.cris.AdaDos.models.Alumno;
 import org.cris.AdaDos.TareaTres.GeneradorPDF;
-import org.cris.AdaDos.utils.ExportadorCSV; // Tu nueva clase
+import org.cris.AdaDos.utils.ExportadorCSV;
 import org.cris.AdaDos.utils.UIEfectos;
 
 import java.io.*;
@@ -50,39 +49,110 @@ public class CapturaController {
     }
 
     private void configurarTabla() {
-        // La magia de PropertyValueFactory requiere el cambio en module-info.java
-        colMatricula.setCellValueFactory(new PropertyValueFactory<>("matricula"));
-        colApellido1.setCellValueFactory(new PropertyValueFactory<>("primerApellido"));
-        colApellido2.setCellValueFactory(new PropertyValueFactory<>("segundoApellido"));
-        colNombres.setCellValueFactory(new PropertyValueFactory<>("nombres"));
-        colCalificacion.setCellValueFactory(new PropertyValueFactory<>("calificacion"));
+        colMatricula.setCellValueFactory(cellData -> cellData.getValue().matriculaProperty());
+        colApellido1.setCellValueFactory(cellData -> cellData.getValue().primerApellidoProperty());
+        colApellido2.setCellValueFactory(cellData -> cellData.getValue().segundoApellidoProperty());
+        colNombres.setCellValueFactory(cellData -> cellData.getValue().nombresProperty());
+
+        // Configuración especial para la columna de calificación
+        colCalificacion.setCellValueFactory(cellData -> cellData.getValue().calificacionProperty());
+
+        // USAMOS LA NUEVA CELDA PERSONALIZADA
+        colCalificacion.setCellFactory(column -> new CeldaCalificacion());
+
+        // Altura de fila un poco más grande para que quepa el mensaje de error si sale
+        tablaAlumnos.setRowFactory(tv -> {
+            TableRow<Alumno> row = new TableRow<>();
+            row.setPrefHeight(60); // Altura fija para evitar saltos raros
+            return row;
+        });
 
         tablaAlumnos.setEditable(true);
-        colCalificacion.setCellFactory(TextFieldTableCell.forTableColumn());
-
-        colCalificacion.setOnEditCommit(event -> {
-            Alumno alumno = event.getRowValue();
-            String nuevoValor = event.getNewValue();
-
-            if (esCalificacionValida(nuevoValor)) {
-                alumno.setCalificacion(nuevoValor);
-                actualizarEstadoBotonCSV();
-            } else {
-                mostrarAlerta(Alert.AlertType.WARNING, "Dato Inválido", "Ingresa un número entero entre 0 y 100.");
-                tablaAlumnos.refresh();
-            }
-        });
     }
 
-    private boolean esCalificacionValida(String valor) {
-        if (valor == null || valor.trim().isEmpty()) return false;
-        try {
-            int nota = Integer.parseInt(valor);
-            return nota >= 0 && nota <= 100;
-        } catch (NumberFormatException e) {
-            return false;
+    // --- CLASE INTERNA PARA LA CELDA "SIEMPRE VISIBLE" ---
+    private class CeldaCalificacion extends TableCell<Alumno, String> {
+        private final TextField textField = new TextField();
+        private final Label errorLabel = new Label("Ingresa un entero (1-100)");
+        private final VBox layout = new VBox(2); // VBox con 2px de espacio
+
+        public CeldaCalificacion() {
+            // Estilo del campo: Blanco y redondeado
+            textField.setStyle("-fx-background-color: white; -fx-background-radius: 5; -fx-border-color: #cccccc; -fx-border-radius: 5;");
+
+            // Estilo del error: Rojo y pequeño
+            errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 9px;");
+            errorLabel.setVisible(false); // Oculto por defecto
+
+            layout.setAlignment(Pos.CENTER);
+            layout.getChildren().addAll(textField, errorLabel);
+
+            // LOGICA: Guardar al perder el foco (click afuera)
+            textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+                if (!isNowFocused) {
+                    procesarInput();
+                }
+            });
+
+            // LOGICA: Guardar al dar Enter (opcional, pero buena costumbre)
+            textField.setOnAction(e -> {
+                procesarInput();
+                // Opcional: mover foco a la siguiente celda o fila si quisieras
+            });
+        }
+
+        private void procesarInput() {
+            String texto = textField.getText().trim();
+            Alumno alumno = getTableRow().getItem();
+
+            if (alumno == null) return;
+
+            if (texto.isEmpty()) {
+                // Caso Vacío -> Valido (S/C)
+                errorLabel.setVisible(false);
+                textField.setStyle("-fx-background-color: white; -fx-background-radius: 5; -fx-border-color: #cccccc; -fx-border-radius: 5;");
+                alumno.setCalificacion("");
+                actualizarEstadoBotonCSV();
+                return;
+            }
+
+            try {
+                int valor = Integer.parseInt(texto);
+                if (valor >= 0 && valor <= 100) {
+                    // Caso Válido
+                    errorLabel.setVisible(false);
+                    textField.setStyle("-fx-background-color: white; -fx-background-radius: 5; -fx-border-color: #28a745; -fx-border-radius: 5;"); // Borde verde sutil
+                    alumno.setCalificacion(String.valueOf(valor));
+                    actualizarEstadoBotonCSV();
+                } else {
+                    mostrarErrorVisual();
+                }
+            } catch (NumberFormatException e) {
+                mostrarErrorVisual();
+            }
+        }
+
+        private void mostrarErrorVisual() {
+            errorLabel.setVisible(true);
+            textField.setStyle("-fx-background-color: #fff0f0; -fx-background-radius: 5; -fx-border-color: red; -fx-border-radius: 5;");
+            // No guardamos el dato inválido en el modelo, o lo dejamos como estaba
+        }
+
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty) {
+                setGraphic(null);
+            } else {
+                // Siempre mostramos el campo de texto (sin doble click)
+                textField.setText(item == null ? "" : item);
+                errorLabel.setVisible(false); // Resetear error al reciclar celda
+                textField.setStyle("-fx-background-color: white; -fx-background-radius: 5; -fx-border-color: #cccccc; -fx-border-radius: 5;");
+                setGraphic(layout);
+            }
         }
     }
+    // -----------------------------------------------------
 
     private void actualizarEstadoBotonCSV() {
         boolean todoCompleto = true;
@@ -107,7 +177,6 @@ public class CapturaController {
         fileChooser.setTitle("Seleccionar lista de alumnos");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivos CSV", "*.csv"));
 
-        // Obtener Stage de forma segura
         Stage stage = (Stage) btnCargarArchivo.getScene().getWindow();
         File file = fileChooser.showOpenDialog(stage);
 
@@ -167,7 +236,6 @@ public class CapturaController {
 
     @FXML
     public void generarCSV() {
-        // Validación final
         for (Alumno al : listaAlumnos) {
             if (!al.tieneCalificacionValida()) {
                 mostrarAlerta(Alert.AlertType.WARNING, "Incompleto", "Faltan calificaciones por asignar.");
@@ -184,7 +252,6 @@ public class CapturaController {
 
         if (destino != null) {
             try {
-                // LLAMADA A TU NUEVA CLASE
                 ExportadorCSV.generarReporte(listaAlumnos, destino.getAbsolutePath());
                 mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "CSV generado correctamente.");
             } catch (IOException e) {
@@ -199,17 +266,13 @@ public class CapturaController {
         alerta.setHeaderText(null);
         alerta.setContentText(mensaje);
 
-        // --- CORRECCIÓN DE POP-UP TÍMIDO ---
-        // 1. Asignar dueño (Owner)
         if (tablaAlumnos.getScene() != null) {
             alerta.initOwner(tablaAlumnos.getScene().getWindow());
         } else if (btnCargarArchivo.getScene() != null) {
             alerta.initOwner(btnCargarArchivo.getScene().getWindow());
         }
 
-        // 2. Hacerlo MODAL DE APLICACIÓN (Bloquea todo lo demás)
         alerta.initModality(Modality.APPLICATION_MODAL);
-
         alerta.showAndWait();
     }
 }
